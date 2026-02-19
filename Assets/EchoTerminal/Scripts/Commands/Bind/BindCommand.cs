@@ -5,14 +5,14 @@ namespace EchoTerminal
 {
 public static class BindCommand
 {
-	[TerminalCommand("bind")]
+	[TerminalCommand("bind", "Bind a key to a command")]
 	private static void Bind(Key key, string command)
 	{
 		BindStore.Set(key, command);
 		Debug.Log($"Bound {key} to: {command}");
 	}
 
-	[TerminalCommand("unbind")]
+	[TerminalCommand("unbind", "Remove a key binding")]
 	private static void Unbind(Key key)
 	{
 		if (BindStore.Remove(key))
@@ -25,7 +25,7 @@ public static class BindCommand
 		}
 	}
 
-	[TerminalCommand("binds")]
+	[TerminalCommand("binds", "List all current key bindings")]
 	private static void Binds()
 	{
 		var all = BindStore.GetAll();
