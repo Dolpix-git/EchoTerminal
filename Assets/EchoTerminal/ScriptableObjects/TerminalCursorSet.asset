@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e8e7fbc26b1d8e4c8e692ccb008347d, type: 3}
+  m_Name: TerminalCursorSet
+  m_EditorClassIdentifier: EchoTerminal::EchoTerminal.TerminalCursorSet
+  _move: {fileID: 2800000, guid: 1075ee61d7df4994aaef5b1d34acd3d4, type: 3}
+  _resizeEW: {fileID: 2800000, guid: 2078afc591f868745a8ac81d8e2c1655, type: 3}
+  _resizeNS: {fileID: 2800000, guid: ceeb780662a662241bc483b019d47bc8, type: 3}
+  _resizeNWSE: {fileID: 2800000, guid: c6f9d0b6881faa2438f8fa955c60c041, type: 3}
+  _resizeNESW: {fileID: 2800000, guid: 39a9e8a56104c1f4aa42bfb7c448bb5b, type: 3}
+  _hotspot: {x: 32, y: 32}

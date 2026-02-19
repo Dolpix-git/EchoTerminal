@@ -21,7 +21,7 @@ public class TerminalView
 
 		if (root.Q<VisualElement>("game-window") != null)
 		{
-			_components.Add(new TerminalGameWindow(root));
+			_components.Add(new TerminalGameWindow(root, config.CursorSet));
 		}
 	}
 

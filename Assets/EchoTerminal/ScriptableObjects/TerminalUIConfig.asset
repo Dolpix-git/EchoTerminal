@@ -16,3 +16,4 @@ MonoBehaviour:
   _suggestionPopupTemplate: {fileID: 9197481963319205126, guid: 84d078cc617082548b34e7e24aa781a0, type: 3}
   _suggestionItemTemplate: {fileID: 9197481963319205126, guid: 3faa17132c14bc247bf9381504b91f24, type: 3}
   _hintItemTemplate: {fileID: 9197481963319205126, guid: 9327c7095b34e8744afd013cda60aca6, type: 3}
+  _cursorSet: {fileID: 11400000, guid: 0e7244db6e7fbab42b1e9de943002a91, type: 2}

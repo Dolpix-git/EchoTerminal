@@ -12,9 +12,13 @@ public class TerminalUIConfig : ScriptableObject
 	[SerializeField] private VisualTreeAsset _suggestionItemTemplate;
 	[SerializeField] private VisualTreeAsset _hintItemTemplate;
 
+	[Header("Cursors")]
+	[SerializeField] private TerminalCursorSet _cursorSet;
+
 	public VisualTreeAsset LogEntryTemplate => _logEntryTemplate;
 	public VisualTreeAsset SuggestionPopupTemplate => _suggestionPopupTemplate;
 	public VisualTreeAsset SuggestionItemTemplate => _suggestionItemTemplate;
 	public VisualTreeAsset HintItemTemplate => _hintItemTemplate;
+	public TerminalCursorSet CursorSet => _cursorSet;
 }
 }
