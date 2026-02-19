@@ -29,6 +29,11 @@ public class TerminalGameWindow : IEchoComponent
 		var closeBtn = window.Q<Button>("close-button");
 		closeBtn?.RegisterCallback<ClickEvent>(_ => window.style.display = DisplayStyle.None);
 
+		if (cursorSet?.Move != null)
+		{
+			closeBtn?.AddManipulator(new TerminalHoverCursorManipulator(null, Vector2.zero, cursorSet.Move, cursorSet.Hotspot));
+		}
+
 		WireResize(
 			window,
 			"resize-right",

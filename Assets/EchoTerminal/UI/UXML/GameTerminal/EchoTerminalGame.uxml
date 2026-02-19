@@ -4,7 +4,7 @@
     <ui:VisualElement name="game-window" class="game-window">
         <ui:VisualElement name="title-bar" class="game-title-bar">
             <ui:Label text="Echo Terminal" class="game-title-text"/>
-            <ui:Button name="close-button" text="X" class="game-close-button"/>
+            <ui:Button name="close-button" text="" class="game-close-button"/>
         </ui:VisualElement>
         <ui:VisualElement name="terminal-content" class="terminal-container" style="flex-grow: 1;">
             <ui:VisualElement name="toolbar" class="terminal-toolbar" style="padding-bottom: 0; padding-top: 0; padding-right: 0; padding-left: 0;">

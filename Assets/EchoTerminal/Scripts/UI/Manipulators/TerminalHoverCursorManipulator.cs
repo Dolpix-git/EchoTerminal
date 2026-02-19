@@ -6,15 +6,19 @@ namespace EchoTerminal.Components
 {
 public class TerminalHoverCursorManipulator : PointerManipulator
 {
-	private readonly Vector2 _hotspot;
 	private readonly Texture2D _texture;
+	private readonly Vector2 _hotspot;
+	private readonly Texture2D _exitTexture;
+	private readonly Vector2 _exitHotspot;
 	private bool _hovered;
 	private bool _pressed;
 
-	public TerminalHoverCursorManipulator(Texture2D texture, Vector2 hotspot)
+	public TerminalHoverCursorManipulator(Texture2D texture, Vector2 hotspot, Texture2D exitTexture = null, Vector2 exitHotspot = default)
 	{
 		_texture = texture;
 		_hotspot = hotspot;
+		_exitTexture = exitTexture;
+		_exitHotspot = exitHotspot;
 	}
 
 	protected override void RegisterCallbacksOnTarget()
@@ -44,7 +48,7 @@ public class TerminalHoverCursorManipulator : PointerManipulator
 		_hovered = false;
 		if (!_pressed)
 		{
-			Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
+			Cursor.SetCursor(_exitTexture, _exitHotspot, CursorMode.Auto);
 		}
 	}
 
@@ -71,7 +75,7 @@ public class TerminalHoverCursorManipulator : PointerManipulator
 		}
 		else
 		{
-			Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
+			Cursor.SetCursor(_exitTexture, _exitHotspot, CursorMode.Auto);
 		}
 	}
 }
