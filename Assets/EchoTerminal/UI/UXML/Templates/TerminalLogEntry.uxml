@@ -1,0 +1,6 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement class="terminal-entry">
+        <ui:Label name="timestamp" class="terminal-timestamp"/>
+        <ui:Label name="message" class="terminal-message"/>
+    </ui:VisualElement>
+</ui:UXML>

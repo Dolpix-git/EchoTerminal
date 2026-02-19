@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c77862c6a45ee1b449e647057a921324, type: 3}
+  m_Name: TerminalUIConfig
+  m_EditorClassIdentifier: EchoTerminal.Runtime::EchoTerminal.TerminalUIConfig
+  _logEntryTemplate: {fileID: 9197481963319205126, guid: cb6eed5ee8f70d44da36eec0378513b6, type: 3}
+  _suggestionPopupTemplate: {fileID: 9197481963319205126, guid: 84d078cc617082548b34e7e24aa781a0, type: 3}
+  _suggestionItemTemplate: {fileID: 9197481963319205126, guid: 3faa17132c14bc247bf9381504b91f24, type: 3}
+  _hintItemTemplate: {fileID: 9197481963319205126, guid: 9327c7095b34e8744afd013cda60aca6, type: 3}

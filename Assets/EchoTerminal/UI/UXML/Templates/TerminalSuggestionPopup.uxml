@@ -1,0 +1,7 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="suggestion-popup" class="terminal-suggestion-popup"
+                      style="display: none;">
+        <ui:VisualElement name="suggestion-list"/>
+        <ui:VisualElement name="hint-list"/>
+    </ui:VisualElement>
+</ui:UXML>

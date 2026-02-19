@@ -1,0 +1,20 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="True">
+    <Style src="project://database/Assets/EchoTerminal/UI/USS/EchoTerminal.uss?fileID=7433441132597879392&amp;guid=3bdff5cc8a8450745a939a9d4ae4112b&amp;type=3#EchoTerminal"/>
+    <ui:VisualElement name="root" class="terminal-container" style="flex-grow: 1;">
+        <ui:VisualElement name="toolbar" class="terminal-toolbar" style="padding-bottom: 0; padding-top: 0; padding-right: 0; padding-left: 0;">
+            <ui:Button name="clear-button" text="Clear" class="terminal-toolbar-button" style="margin-left: 0; margin-right: 0; padding-bottom: 0; padding-top: 0; height: 100%;"/>
+            <ui:VisualElement class="terminal-toolbar-separator"/>
+            <ui:Button name="timestamps-toggle" text="Timestamps" class="terminal-toolbar-toggle" style="margin-right: 0; padding-top: 0; padding-bottom: 0; height: 100%; margin-left: 0;"/>
+        </ui:VisualElement>
+        <ui:ScrollView name="log-scroll" class="terminal-log">
+            <ui:VisualElement name="log-container"/>
+        </ui:ScrollView>
+        <ui:VisualElement name="input-row" class="terminal-input-row">
+            <ui:VisualElement name="prompt-icon" class="terminal-prompt"/>
+            <ui:VisualElement name="TextContainer" style="flex-grow: 1;">
+                <ui:TextField name="input-field" class="terminal-input"/>
+                <ui:Label name="highlight-label" picking-mode="Ignore" class="terminal-highlight"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3ba42cf393e95d4291167c5ce4b7675, type: 3}
+  m_Name: EchoTerminalAssets
+  m_EditorClassIdentifier: EchoTerminal.Editor::EchoTerminal.Editor.EchoTerminalAssets
+  _uxml: {fileID: 9197481963319205126, guid: 0a1760134683b8c4186885df303e67d1, type: 3}
+  _styleSheet: {fileID: 7433441132597879392, guid: 3bdff5cc8a8450745a939a9d4ae4112b, type: 3}
+  _config: {fileID: 11400000, guid: afe41ef184085bf4aa6b3da6c04bf252, type: 2}

@@ -1,0 +1,32 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/EchoTerminal/UI/USS/EchoTerminal.uss?fileID=7433441132597879392&amp;guid=3bdff5cc8a8450745a939a9d4ae4112b&amp;type=3#EchoTerminal"/>
+    <Style src="project://database/Assets/EchoTerminal/UI/USS/EchoTerminalGame.uss?fileID=7433441132597879392&amp;guid=a7f59c663bb04ae48810d7e9b0b90def&amp;type=3#EchoTerminalGame"/>
+    <ui:VisualElement name="game-window" class="game-window">
+        <ui:VisualElement name="title-bar" class="game-title-bar">
+            <ui:Label text="Echo Terminal" class="game-title-text"/>
+            <ui:Button name="close-button" text="X" class="game-close-button"/>
+        </ui:VisualElement>
+        <ui:VisualElement name="terminal-content" class="terminal-container" style="flex-grow: 1;">
+            <ui:VisualElement name="toolbar" class="terminal-toolbar" style="padding-bottom: 0; padding-top: 0; padding-right: 0; padding-left: 0;">
+                <ui:Button name="clear-button" text="Clear" class="terminal-toolbar-button" style="margin-left: 0; margin-right: 0; padding-bottom: 0; padding-top: 0; height: 100%;"/>
+                <ui:VisualElement class="terminal-toolbar-separator"/>
+                <ui:Button name="timestamps-toggle" text="Timestamps" class="terminal-toolbar-toggle" style="margin-right: 0; padding-top: 0; padding-bottom: 0; height: 100%; margin-left: 0;"/>
+            </ui:VisualElement>
+            <ui:ScrollView name="log-scroll" class="terminal-log">
+                <ui:VisualElement name="log-container"/>
+            </ui:ScrollView>
+            <ui:VisualElement name="input-row" class="terminal-input-row">
+                <ui:VisualElement name="prompt-icon" class="terminal-prompt"/>
+                <ui:VisualElement name="TextContainer" style="flex-grow: 1;">
+                    <ui:TextField name="input-field" class="terminal-input"/>
+                    <ui:Label name="highlight-label" picking-mode="Ignore" class="terminal-highlight" style="top: 0; bottom: 0; right: 0; left: 1px;"/>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="resize-right" class="game-resize-handle game-resize-right"/>
+        <ui:VisualElement name="resize-bottom" class="game-resize-handle game-resize-bottom"/>
+        <ui:VisualElement name="resize-left" class="game-resize-handle game-resize-left"/>
+        <ui:VisualElement name="resize-corner-br" class="game-resize-handle game-resize-corner-br"/>
+        <ui:VisualElement name="resize-corner-bl" class="game-resize-handle game-resize-corner-bl"/>
+    </ui:VisualElement>
+</ui:UXML>
