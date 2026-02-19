@@ -5,7 +5,7 @@ namespace EchoTerminal.Components
 {
 public class TerminalGameWindow : IEchoComponent
 {
-	public TerminalGameWindow(VisualElement root, TerminalCursorSet cursorSet = null)
+	public TerminalGameWindow(VisualElement root, TerminalCursorSet cursorSet = null, TerminalDragConstraints dragConstraints = default)
 	{
 		var window = root.Q<VisualElement>("game-window");
 
@@ -23,7 +23,7 @@ public class TerminalGameWindow : IEchoComponent
 				titleBar.AddManipulator(new TerminalHoverCursorManipulator(cursorSet.Move, cursorSet.Hotspot));
 			}
 
-			titleBar.AddManipulator(new TerminalDragManipulator(window));
+			titleBar.AddManipulator(new TerminalDragManipulator(window, dragConstraints));
 		}
 
 		var closeBtn = window.Q<Button>("close-button");

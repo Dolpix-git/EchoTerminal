@@ -14,11 +14,13 @@ public class TerminalUIConfig : ScriptableObject
 
 	[Header("Cursors")]
 	[SerializeField] private TerminalCursorSet _cursorSet;
+	[SerializeField] private TerminalDragConstraints _dragConstraints;
 
 	public VisualTreeAsset LogEntryTemplate => _logEntryTemplate;
 	public VisualTreeAsset SuggestionPopupTemplate => _suggestionPopupTemplate;
 	public VisualTreeAsset SuggestionItemTemplate => _suggestionItemTemplate;
 	public VisualTreeAsset HintItemTemplate => _hintItemTemplate;
 	public TerminalCursorSet CursorSet => _cursorSet;
+	public TerminalDragConstraints DragConstraints => _dragConstraints;
 }
 }
