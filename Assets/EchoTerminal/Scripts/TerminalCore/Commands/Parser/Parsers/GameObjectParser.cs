@@ -4,7 +4,7 @@ namespace EchoTerminal
 {
 public class GameObjectParser
 {
-	public static readonly Color HighlightColor = new(1f, 0.85f, 0.4f);
+	public Color HighlightColor => new(1f, 0.85f, 0.4f);
 
 	public bool TryParse(string token, out string targetName)
 	{

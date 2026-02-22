@@ -2,108 +2,31 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
+using UnityEngine;
 
 namespace EchoTerminal
 {
 public class CommandParser
 {
-	public ValueParserRegistry Values => _values;
+	public ValueParserRegistry Values { get; }
+	public Color CommandNameColor => _commandNameParser.HighlightColor;
+	public Color TargetColor => _gameObjectParser.HighlightColor;
 
-	private readonly ValueParserRegistry _values;
 	private readonly CommandNameParser _commandNameParser;
 	private readonly GameObjectParser _gameObjectParser;
 	private readonly Dictionary<char, char> _delimiterPairs;
 
-	public CommandParser(ValueParserRegistry values)
+	public CommandParser()
 	{
-		_values = values;
+		Values = new();
 		_commandNameParser = new();
 		_gameObjectParser = new();
-		_delimiterPairs = values.GetDelimiterPairs();
+		_delimiterPairs = Values.GetDelimiterPairs();
 	}
 
 	public List<string> Tokenize(string input)
 	{
-		var tokens = new List<string>();
-		var current = new StringBuilder();
-
-		for (var i = 0; i < input.Length; i++)
-		{
-			var character = input[i];
-
-			if (character == ' ')
-			{
-				if (current.Length > 0)
-				{
-					tokens.Add(current.ToString());
-					current.Clear();
-				}
-
-				continue;
-			}
-
-			if (_delimiterPairs != null && _delimiterPairs.TryGetValue(character, out var closeDelim))
-			{
-				if (current.Length > 0)
-				{
-					tokens.Add(current.ToString());
-					current.Clear();
-				}
-
-				current.Append(character);
-				i++;
-
-				if (character == closeDelim)
-				{
-					while (i < input.Length && input[i] != closeDelim)
-					{
-						current.Append(input[i]);
-						i++;
-					}
-
-					if (i < input.Length)
-					{
-						current.Append(input[i]);
-					}
-				}
-				else
-				{
-					var depth = 1;
-
-					while (i < input.Length && depth > 0)
-					{
-						var ch = input[i];
-						current.Append(ch);
-
-						if (ch == character)
-						{
-							depth++;
-						}
-						else if (ch == closeDelim)
-						{
-							depth--;
-						}
-
-						i++;
-					}
-
-					i--;
-				}
-
-				tokens.Add(current.ToString());
-				current.Clear();
-				continue;
-			}
-
-			current.Append(character);
-		}
-
-		if (current.Length > 0)
-		{
-			tokens.Add(current.ToString());
-		}
-
-		return tokens;
+		return TokenizeWithSpans(input).ConvertAll(s => s.token);
 	}
 
 	public List<(string token, int start, int end)> TokenizeWithSpans(string input)
@@ -255,7 +178,7 @@ public class CommandParser
 
 		for (var i = 0; i < parameters.Length; i++)
 		{
-			if (!_values.TryConvertSingle(args[i], parameters[i].ParameterType, out results[i]))
+			if (!Values.TryConvertSingle(args[i], parameters[i].ParameterType, out results[i]))
 			{
 				failedIndex = i;
 				return false;
@@ -302,20 +225,22 @@ public class CommandParser
 		result.CommandName = result.Spans[0].token.ToLowerInvariant();
 		result.CommandValid = CommandRegistry.Instance.HasCommand(result.CommandName);
 
-		result.HasTarget = result.Spans.Count > 1
-			&& result.Spans[1].token.Length > 0
-			&& result.Spans[1].token[0] == '@';
+		result.HasTarget = result.Spans.Count > 1 &&
+						   result.Spans[1].token.Length > 0 &&
+						   result.Spans[1].token[0] == '@';
 		result.ArgStart = result.HasTarget ? 2 : 1;
 
 		if (result.CommandValid)
 		{
 			result.Parameters = ResolveParameters(
-				result.CommandName, result.Spans.Count, result.HasTarget);
+				result.CommandName,
+				result.Spans.Count,
+				result.HasTarget);
 		}
 
-		if (result.Parameters != null
-			&& result.Parameters.Length >= 2
-			&& result.Parameters[^1].ParameterType == typeof(string))
+		if (result.Parameters != null &&
+			result.Parameters.Length >= 2 &&
+			result.Parameters[^1].ParameterType == typeof(string))
 		{
 			result.SubCommandOffset = result.ArgStart + result.Parameters.Length - 1;
 		}

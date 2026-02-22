@@ -9,6 +9,8 @@ namespace EchoTerminal
 public class ValueParserRegistry
 {
 	private readonly Dictionary<Type, IValueParser> _parsers = new();
+	private readonly Dictionary<Type, IValueParser> _enumParsers = new();
+	private readonly IValueParser _listParser;
 	private Dictionary<char, char> _delimiterPairs;
 	private HashSet<char> _closeDelimiters;
 
@@ -22,7 +24,8 @@ public class ValueParserRegistry
 		Register(new Vector2Parser());
 		Register(new Vector3Parser());
 		Register(new ColorParser());
-		Register(new ListParser());
+		_listParser = new ListParser();
+		Register(_listParser);
 	}
 
 	public void Register(IValueParser parser)
@@ -30,6 +33,35 @@ public class ValueParserRegistry
 		_parsers[parser.TargetType] = parser;
 		_delimiterPairs = null;
 		_closeDelimiters = null;
+	}
+
+	// Resolves a parser for any type: registered, List<T>, or Enum.
+	// Enum parsers are created on demand and cached separately to avoid
+	// invalidating the delimiter cache.
+	private IValueParser FindParser(Type targetType)
+	{
+		if (_parsers.TryGetValue(targetType, out var parser))
+		{
+			return parser;
+		}
+
+		if (targetType.IsGenericType && targetType.GetGenericTypeDefinition() == typeof(List<>))
+		{
+			return _listParser;
+		}
+
+		if (targetType.IsEnum)
+		{
+			if (!_enumParsers.TryGetValue(targetType, out var enumParser))
+			{
+				enumParser = new EnumParser(targetType);
+				_enumParsers[targetType] = enumParser;
+			}
+
+			return enumParser;
+		}
+
+		return null;
 	}
 
 	public Dictionary<char, char> GetDelimiterPairs()
@@ -53,57 +85,17 @@ public class ValueParserRegistry
 	}
 
 	public Color? GetHighlightColor(Type targetType)
-	{
-		if (_parsers.TryGetValue(targetType, out var parser))
-		{
-			return parser.HighlightColor;
-		}
-
-		if (targetType.IsGenericType && targetType.GetGenericTypeDefinition() == typeof(List<>))
-		{
-			return new Color(0.4f, 0.9f, 0.8f);
-		}
-
-		if (targetType.IsEnum)
-		{
-			return new Color(1f, 0.6f, 0.2f);
-		}
-
-		return null;
-	}
+		=> FindParser(targetType)?.HighlightColor;
 
 	public string GetHint(Type targetType, string paramName)
 	{
-		if (_parsers.TryGetValue(targetType, out var parser))
-		{
-			return paramName + ": " + parser.Hint;
-		}
-
-		if (targetType.IsGenericType && targetType.GetGenericTypeDefinition() == typeof(List<>))
-		{
-			return paramName + ": [item,item,...]";
-		}
-
-		if (targetType.IsEnum)
-		{
-			return paramName + $": {targetType}";
-		}
-
-		return null;
+		var parser = FindParser(targetType);
+		return parser != null ? paramName + ": " + parser.Hint : null;
 	}
 
 	public List<string> GetSuggestions(Type targetType, string partial)
 	{
-		string[] candidates = null;
-
-		if (_parsers.TryGetValue(targetType, out var parser))
-		{
-			candidates = parser.Suggestions;
-		}
-		else if (targetType.IsEnum)
-		{
-			candidates = Enum.GetNames(targetType);
-		}
+		var candidates = FindParser(targetType)?.Suggestions;
 
 		if (candidates == null || candidates.Length == 0)
 		{
@@ -124,34 +116,24 @@ public class ValueParserRegistry
 		return filtered.Count > 0 ? filtered : null;
 	}
 
+	
+	
 	public bool TryConvertSingle(string token, Type targetType, out object result)
 	{
 		result = null;
+		var parser = FindParser(targetType);
 
-		if (_parsers.TryGetValue(targetType, out var parser))
+		if (parser == null)
 		{
-			return parser.TryParse(token, out result);
+			return false;
 		}
 
-		if (targetType.IsGenericType && targetType.GetGenericTypeDefinition() == typeof(List<>))
+		if (parser is ListParser)
 		{
 			return TryParseList(token, targetType, out result);
 		}
 
-		if (targetType.IsEnum)
-		{
-			try
-			{
-				result = Enum.Parse(targetType, token, true);
-				return true;
-			}
-			catch
-			{
-				return false;
-			}
-		}
-
-		return false;
+		return parser.TryParse(token, out result);
 	}
 
 	private bool TryParseList(string token, Type listType, out object result)

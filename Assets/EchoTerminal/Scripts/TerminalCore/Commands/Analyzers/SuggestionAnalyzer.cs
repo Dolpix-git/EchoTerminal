@@ -70,7 +70,7 @@ public class SuggestionAnalyzer
 			};
 		}
 
-		var argIndex = analysis.HasTarget ? analysis.EditingIndex - 2 : analysis.EditingIndex - 1;
+		var argIndex = analysis.EditingIndex - analysis.ArgStart;
 
 		if (analysis.Parameters == null || argIndex < 0 || argIndex >= analysis.Parameters.Length)
 		{

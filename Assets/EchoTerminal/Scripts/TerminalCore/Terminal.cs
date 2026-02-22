@@ -14,7 +14,7 @@ public class Terminal
 	public Terminal(int maxEntries = 1000)
 	{
 		_maxEntries = maxEntries;
-		var parser = new CommandParser(new());
+		var parser = new CommandParser();
 		CommandProcessor = new(this, parser);
 		Highlighter = new(parser);
 		SuggestionAnalyzer = new(parser);
@@ -24,7 +24,7 @@ public class Terminal
 	public IReadOnlyList<TerminalEntry> Entries => _entries;
 
 	private CommandProcessor CommandProcessor { get; }
-	private InputHighlighter Highlighter { get; }
+	private CommandHighlighter Highlighter { get; }
 	private SuggestionAnalyzer SuggestionAnalyzer { get; }
 	private HintAnalyzer HintAnalyzer { get; }
 

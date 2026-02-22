@@ -10,7 +10,7 @@
             <ui:VisualElement name="log-container"/>
         </ui:ScrollView>
         <ui:VisualElement name="input-row" class="terminal-input-row">
-            <ui:VisualElement name="prompt-icon" class="terminal-prompt"/>
+            <ui:VisualElement name="prompt-icon" class="terminal-prompt" style="height: 12px;"/>
             <ui:VisualElement name="TextContainer" style="flex-grow: 1;">
                 <ui:TextField name="input-field" class="terminal-input"/>
                 <ui:Label name="highlight-label" picking-mode="Ignore" class="terminal-highlight"/>

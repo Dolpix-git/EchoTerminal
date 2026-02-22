@@ -4,7 +4,7 @@ namespace EchoTerminal
 {
 public class CommandNameParser
 {
-	public static readonly Color HighlightColor = new(0.5f, 0.9f, 1f);
+	public Color HighlightColor => new(0.5f, 0.9f, 1f);
 
 	public bool TryParse(string token, out string commandName)
 	{

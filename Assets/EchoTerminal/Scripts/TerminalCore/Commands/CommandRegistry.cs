@@ -81,9 +81,7 @@ public class CommandRegistry
 		return _commandCache.ContainsKey(name);
 	}
 
-	public List<(MonoBehaviour target, MethodInfo method)> FindCommands(
-		string commandName,
-		string targetName)
+	public List<(MonoBehaviour target, MethodInfo method)> FindCommands( string commandName, string targetName)
 	{
 		if (!_commandCache.TryGetValue(commandName, out var all))
 		{

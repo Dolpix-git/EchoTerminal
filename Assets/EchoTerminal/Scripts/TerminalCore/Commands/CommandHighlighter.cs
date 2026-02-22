@@ -3,13 +3,13 @@ using UnityEngine;
 
 namespace EchoTerminal
 {
-public class InputHighlighter
+public class CommandHighlighter
 {
 	private static readonly Color ErrorColor = new(1f, 0.3f, 0.3f);
 	private static readonly Color IncompleteColor = new(0.6f, 0.6f, 0.6f);
 	private readonly CommandParser _parser;
 
-	public InputHighlighter(CommandParser parser)
+	public CommandHighlighter(CommandParser parser)
 	{
 		_parser = parser;
 	}
@@ -54,38 +54,28 @@ public class InputHighlighter
 
 			Color color;
 
-			switch (i)
+			if (i == 0)
 			{
-				case 0:
-					color = analysis.CommandValid ? CommandNameParser.HighlightColor : fallback;
-					break;
-				case 1 when analysis.HasTarget:
-					color = GameObjectParser.HighlightColor;
-					break;
-				default:
+				color = analysis.CommandValid ? _parser.CommandNameColor : fallback;
+			}
+			else if (i < analysis.ArgStart)
+			{
+				color = _parser.TargetColor;
+			}
+			else
+			{
+				var argIndex = i - analysis.ArgStart;
+
+				if (analysis.Parameters != null && argIndex < analysis.Parameters.Length)
 				{
-					var argIndex = analysis.HasTarget ? i - 2 : i - 1;
-
-					if (analysis.Parameters != null && argIndex >= 0
-						&& argIndex < analysis.Parameters.Length)
-					{
-						var paramType = analysis.Parameters[argIndex].ParameterType;
-
-						if (_parser.Values.TryConvertSingle(token, paramType, out _))
-						{
-							color = _parser.Values.GetHighlightColor(paramType) ?? fallback;
-						}
-						else
-						{
-							color = fallback;
-						}
-					}
-					else
-					{
-						color = fallback;
-					}
-
-					break;
+					var paramType = analysis.Parameters[argIndex].ParameterType;
+					color = _parser.Values.TryConvertSingle(token, paramType, out _)
+						? _parser.Values.GetHighlightColor(paramType) ?? fallback
+						: fallback;
+				}
+				else
+				{
+					color = fallback;
 				}
 			}
 
