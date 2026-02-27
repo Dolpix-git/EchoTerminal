@@ -27,8 +27,7 @@ public class TerminalSuggestionPopup
 		_hintItemTemplate = config.HintItemTemplate;
 	}
 
-	public bool IsVisible => _container.style.display == DisplayStyle.Flex;
-	public bool HasSuggestions => _suggestions != null && _suggestions.Count > 0;
+	public bool HasSuggestions => _suggestions is { Count: > 0 };
 
 	public void Update(AutocompleteContext context, List<string> hints)
 	{
