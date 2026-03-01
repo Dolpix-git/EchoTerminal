@@ -1,29 +1,44 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace EchoTerminal
 {
 public class CommandRegistry
 {
-	private readonly Dictionary<string, MethodInfo> _commands = new(StringComparer.OrdinalIgnoreCase);
+	private readonly Dictionary<string, CommandEntry> _commands = new(StringComparer.OrdinalIgnoreCase);
+	private readonly Dictionary<Type, Component> _instanceCache = new();
 	private bool _scanned;
-
-	public static CommandRegistry Instance { get; } = new();
-
-	public bool TryGet(string name, out MethodInfo method)
-	{
-		EnsureScanned();
-		return _commands.TryGetValue(name, out method);
-	}
 
 	public IReadOnlyCollection<string> GetCommandNames()
 	{
-		EnsureScanned();
 		return _commands.Keys;
 	}
 
-	private void EnsureScanned()
+	public bool TryGet(string name, out CommandEntry entry)
+	{
+		return _commands.TryGetValue(name, out entry);
+	}
+
+	public Component GetInstance(Type monoType)
+	{
+		if (_instanceCache.TryGetValue(monoType, out var cached) && cached != null)
+		{
+			return cached;
+		}
+
+		var found = (Component)Object.FindFirstObjectByType(monoType);
+		if (found != null)
+		{
+			_instanceCache[monoType] = found;
+		}
+
+		return found;
+	}
+
+	public void Scan()
 	{
 		if (_scanned)
 		{
@@ -56,23 +71,39 @@ public class CommandRegistry
 					continue;
 				}
 
-				foreach (var method in type.GetMethods(BindingFlags.Static |
-													   BindingFlags.Public |
-													   BindingFlags.NonPublic))
+				ScanMethods(
+					type, 
+					BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic, 
+					monoType: null
+				);
+
+				if (typeof(MonoBehaviour).IsAssignableFrom(type) && !type.IsAbstract)
 				{
-					var attr = method.GetCustomAttribute<TerminalCommandAttribute>();
-					if (attr == null)
-					{
-						continue;
-					}
-
-					var commandName = string.IsNullOrEmpty(attr.Name)
-						? method.Name.ToLowerInvariant()
-						: attr.Name.ToLowerInvariant();
-
-					_commands[commandName] = method;
+					ScanMethods(
+						type,
+						BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+						monoType: type
+					);
 				}
 			}
+		}
+	}
+
+	private void ScanMethods(Type type, BindingFlags flags, Type monoType)
+	{
+		foreach (var method in type.GetMethods(flags))
+		{
+			var attr = method.GetCustomAttribute<TerminalCommandAttribute>();
+			if (attr == null)
+			{
+				continue;
+			}
+
+			var name = string.IsNullOrEmpty(attr.Name)
+				? method.Name.ToLowerInvariant()
+				: attr.Name.ToLowerInvariant();
+
+			_commands[name] = new(method, monoType);
 		}
 	}
 }

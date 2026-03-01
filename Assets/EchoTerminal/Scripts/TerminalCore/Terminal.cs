@@ -13,10 +13,14 @@ public class Terminal
 	private readonly int _maxEntries;
 	private readonly CommandProcessor _processor;
 
+	public CommandRegistry Registry { get; }
+
 	public Terminal(int maxEntries = 1000)
 	{
 		_maxEntries = maxEntries;
-		_processor = new(this);
+		Registry = new();
+		Registry.Scan();
+		_processor = new(this, Registry);
 	}
 
 	public IReadOnlyList<TerminalEntry> Entries => _entries;
