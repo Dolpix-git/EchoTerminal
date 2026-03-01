@@ -9,7 +9,7 @@ namespace EchoTerminal
 public class CommandRegistry
 {
 	private readonly Dictionary<string, CommandEntry> _commands = new(StringComparer.OrdinalIgnoreCase);
-	private readonly Dictionary<Type, Component> _instanceCache = new();
+	private readonly Dictionary<Type, Component[]> _instanceCache = new();
 	private bool _scanned;
 
 	public IReadOnlyCollection<string> GetCommandNames()
@@ -22,19 +22,15 @@ public class CommandRegistry
 		return _commands.TryGetValue(name, out entry);
 	}
 
-	public Component GetInstance(Type monoType)
+	public Component[] GetInstances(Type monoType)
 	{
-		if (_instanceCache.TryGetValue(monoType, out var cached) && cached != null)
+		if (_instanceCache.TryGetValue(monoType, out var cached))
 		{
 			return cached;
 		}
 
-		var found = (Component)Object.FindFirstObjectByType(monoType);
-		if (found != null)
-		{
-			_instanceCache[monoType] = found;
-		}
-
+		var found = (Component[])Object.FindObjectsByType(monoType, FindObjectsSortMode.None);
+		_instanceCache[monoType] = found;
 		return found;
 	}
 
@@ -72,9 +68,9 @@ public class CommandRegistry
 				}
 
 				ScanMethods(
-					type, 
-					BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic, 
-					monoType: null
+					type,
+					BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic,
+					null
 				);
 
 				if (typeof(MonoBehaviour).IsAssignableFrom(type) && !type.IsAbstract)
@@ -82,7 +78,7 @@ public class CommandRegistry
 					ScanMethods(
 						type,
 						BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
-						monoType: type
+						type
 					);
 				}
 			}

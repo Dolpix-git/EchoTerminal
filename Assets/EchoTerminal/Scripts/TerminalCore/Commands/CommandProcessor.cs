@@ -10,11 +10,13 @@ public class CommandProcessor
 	{
 		{ typeof(int), new IntParser() },
 		{ typeof(bool), new BoolParser() },
-		{ typeof(string), new StringParser() }
+		{ typeof(string), new StringParser() },
+		{ typeof(UnityEngine.GameObject), new GameObjectParser() }
 	};
 
-	private readonly Terminal _terminal;
 	private readonly CommandRegistry _registry;
+
+	private readonly Terminal _terminal;
 
 	public CommandProcessor(Terminal terminal, CommandRegistry registry)
 	{
@@ -31,8 +33,8 @@ public class CommandProcessor
 		}
 
 		var space = remaining.IndexOf(' ');
-		var commandName = space == -1 ? remaining : remaining.Substring(0, space);
-		remaining = space == -1 ? string.Empty : remaining.Substring(space).TrimStart();
+		var commandName = space == -1 ? remaining : remaining[..space];
+		remaining = space == -1 ? string.Empty : remaining[space..].TrimStart();
 
 		if (!_registry.TryGet(commandName, out var entry))
 		{
@@ -48,6 +50,19 @@ public class CommandProcessor
 
 	private bool TryInvoke(CommandEntry entry, string commandString)
 	{
+		UnityEngine.GameObject singleTarget = null;
+		if (!entry.IsStatic && Parsers[typeof(UnityEngine.GameObject)].TryParse(commandString, out var goObj, out var goConsumed))
+		{
+			var targetName = commandString[1..goConsumed];
+			commandString = commandString[goConsumed..].TrimStart();
+			singleTarget = goObj as UnityEngine.GameObject;
+			if (singleTarget == null)
+			{
+				_terminal.Log($"No GameObject named '{targetName}' found in scene.");
+				return true;
+			}
+		}
+
 		var parameters = entry.Method.GetParameters();
 		var args = new object[parameters.Length];
 
@@ -74,18 +89,42 @@ public class CommandProcessor
 			commandString = commandString.Substring(consumed).TrimStart();
 		}
 
-		object target = null;
-		if (!entry.IsStatic)
+		if (entry.IsStatic)
 		{
-			target = _registry.GetInstance(entry.MonoType);
-			if (target == null)
+			var result = entry.Method.Invoke(null, args);
+			if (result is string message)
 			{
-				_terminal.Log($"No active '{entry.MonoType.Name}' found in scene.");
-				return true;
+				_terminal.Log(message);
+			}
+
+			return true;
+		}
+
+		var targets = _registry.GetInstances(entry.MonoType);
+		var invoked = false;
+
+		foreach (var target in targets)
+		{
+			if (singleTarget != null && target.gameObject != singleTarget)
+			{
+				continue;
+			}
+
+			invoked = true;
+			var result = entry.Method.Invoke(target, args);
+			if (result is string message)
+			{
+				_terminal.Log(message);
 			}
 		}
 
-		entry.Method.Invoke(target, args);
+		if (!invoked)
+		{
+			_terminal.Log(singleTarget != null
+				? $"No '{entry.MonoType.Name}' on '{singleTarget.name}' found in scene."
+				: $"No active '{entry.MonoType.Name}' found in scene.");
+		}
+
 		return true;
 	}
 }
