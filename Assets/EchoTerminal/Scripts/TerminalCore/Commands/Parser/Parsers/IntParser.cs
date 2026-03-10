@@ -5,6 +5,7 @@ namespace EchoTerminal.Scripts.Test
 public class IntParser : IParser
 {
 	public Type TargetType => typeof(int);
+	public string HighlightColor => "#FFB86C";
 
 	public bool TryParse(string input, out object result, out int charsConsumed)
 	{

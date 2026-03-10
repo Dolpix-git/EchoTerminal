@@ -7,6 +7,7 @@ namespace EchoTerminal.Scripts.Test
 public class Vector2Parser : IParser
 {
 	public Type TargetType => typeof(Vector2);
+	public string HighlightColor => "#8BE9FD";
 
 	public bool TryParse(string input, out object result, out int charsConsumed)
 	{
