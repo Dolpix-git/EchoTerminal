@@ -7,17 +7,9 @@ namespace EchoTerminal
 {
 public static class BindStore
 {
+	public static event Action Changed;
 	private const string _prefsKey = "EchoTerminal.Binds";
 	private static Dictionary<Key, string> _cache;
-
-	public static event Action Changed;
-
-	[Serializable]
-	private class BindData
-	{
-		public List<Key> Keys = new();
-		public List<string> Commands = new();
-	}
 
 	public static Dictionary<Key, string> GetAll()
 	{
@@ -27,7 +19,7 @@ public static class BindStore
 		}
 
 		var data = Load();
-		_cache = new Dictionary<Key, string>();
+		_cache = new();
 
 		for (var i = 0; i < data.Keys.Count; i++)
 		{
@@ -106,6 +98,13 @@ public static class BindStore
 	{
 		PlayerPrefs.SetString(_prefsKey, JsonUtility.ToJson(data));
 		PlayerPrefs.Save();
+	}
+
+	[Serializable]
+	private class BindData
+	{
+		public List<Key> Keys = new();
+		public List<string> Commands = new();
 	}
 }
 }

@@ -1,3 +1,4 @@
+using System.Text;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -15,14 +16,7 @@ public static class BindCommand
 	[TerminalCommand("unbind", "Remove a key binding")]
 	private static void Unbind(Key key)
 	{
-		if (BindStore.Remove(key))
-		{
-			Debug.Log($"Unbound {key}");
-		}
-		else
-		{
-			Debug.Log($"No bind found for '{key}'");
-		}
+		Debug.Log(BindStore.Remove(key) ? $"Unbound {key}" : $"No bind found for '{key}'");
 	}
 
 	[TerminalCommand("binds", "List all current key bindings")]
@@ -36,7 +30,7 @@ public static class BindCommand
 			return;
 		}
 
-		var sb = new System.Text.StringBuilder();
+		var sb = new StringBuilder();
 		sb.AppendLine("Current binds:");
 
 		foreach (var (key, command) in all)

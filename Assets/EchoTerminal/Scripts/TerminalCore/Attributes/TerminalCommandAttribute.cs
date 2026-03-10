@@ -2,7 +2,7 @@ using System;
 
 namespace EchoTerminal
 {
-[AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
+[AttributeUsage(AttributeTargets.Method)]
 public sealed class TerminalCommandAttribute : Attribute
 {
 	public string Name { get; }

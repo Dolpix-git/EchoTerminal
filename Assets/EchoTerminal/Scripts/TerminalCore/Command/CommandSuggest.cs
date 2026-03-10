@@ -14,11 +14,11 @@ public class CommandSuggest
 		_registry = registry;
 	}
 
-	public AutocompleteContext GetSuggestions(string input)
+	public SuggestionContext GetSuggestions(string input)
 	{
 		if (string.IsNullOrEmpty(input))
 		{
-			return AutocompleteContext.Empty;
+			return SuggestionContext.Empty;
 		}
 
 		var trimmed = input.TrimStart();
@@ -38,7 +38,7 @@ public class CommandSuggest
 
 			if (matches.Count == 0)
 			{
-				return AutocompleteContext.Empty;
+				return SuggestionContext.Empty;
 			}
 
 			return new()
@@ -65,7 +65,7 @@ public class CommandSuggest
 
 			if (goMatches.Count == 0)
 			{
-				return AutocompleteContext.Empty;
+				return SuggestionContext.Empty;
 			}
 
 			var atPos = input.IndexOf('@', leadingSpaces + space);
@@ -77,7 +77,7 @@ public class CommandSuggest
 			};
 		}
 
-		return AutocompleteContext.Empty;
+		return SuggestionContext.Empty;
 	}
 
 	public List<string> GetHints(string input)

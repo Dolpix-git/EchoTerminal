@@ -10,7 +10,7 @@ public class TerminalSuggestionPopup
 	private readonly VisualTreeAsset _hintItemTemplate;
 	private readonly VisualElement _listContainer;
 	private readonly VisualTreeAsset _suggestionItemTemplate;
-	private AutocompleteContext _context;
+	private SuggestionContext _context;
 	private int _selectedIndex;
 
 	private List<string> _suggestions;
@@ -29,7 +29,7 @@ public class TerminalSuggestionPopup
 
 	public bool HasSuggestions => _suggestions is { Count: > 0 };
 
-	public void Update(AutocompleteContext context, List<string> hints)
+	public void Update(SuggestionContext context, List<string> hints)
 	{
 		_context = context;
 		var hasSuggestions = context.Suggestions != null && context.Suggestions.Count > 0;

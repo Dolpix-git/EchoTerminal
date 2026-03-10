@@ -2,9 +2,9 @@ using System.Collections.Generic;
 
 namespace EchoTerminal
 {
-public class AutocompleteContext
+public struct SuggestionContext
 {
-	public static readonly AutocompleteContext Empty = new();
+	public static readonly SuggestionContext Empty = new();
 	public List<string> Suggestions;
 	public int ReplaceStart;
 	public int ReplaceEnd;

@@ -6,31 +6,14 @@ namespace EchoTerminal
 {
 public class BindExecutor : MonoBehaviour
 {
-	private GameTerminalUI _terminalUI;
 	private Dictionary<Key, string> _binds;
-
-	public void Init(GameTerminalUI terminalUI)
-	{
-		_terminalUI = terminalUI;
-		RebuildCache();
-		BindStore.Changed += RebuildCache;
-	}
-
-	private void OnDestroy()
-	{
-		BindStore.Changed -= RebuildCache;
-	}
-
-	private void RebuildCache()
-	{
-		_binds = BindStore.GetAll();
-	}
+	private GameTerminalUI _terminalUI;
 
 	private void Update()
 	{
 		if (_terminalUI == null || _terminalUI.Terminal == null)
 		{
-		 	return;
+			return;
 		}
 
 		if (GameTerminalUI.IsFocused)
@@ -52,6 +35,23 @@ public class BindExecutor : MonoBehaviour
 				_terminalUI.Terminal.Submit(command);
 			}
 		}
+	}
+
+	private void OnDestroy()
+	{
+		BindStore.Changed -= RebuildCache;
+	}
+
+	public void Init(GameTerminalUI terminalUI)
+	{
+		_terminalUI = terminalUI;
+		RebuildCache();
+		BindStore.Changed += RebuildCache;
+	}
+
+	private void RebuildCache()
+	{
+		_binds = BindStore.GetAll();
 	}
 }
 }
