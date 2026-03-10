@@ -46,13 +46,11 @@ public class TerminalInput : IEchoComponent
 			return;
 		}
 
-		// ToDo Reintroduce when we have static highlight, suggestion, or hints class.
-		_highlight.text = evt.newValue;
-		// _highlight.text = _terminal.Highlight(evt.newValue);
-		// _popup.Update(
-		// 	_terminal.GetSuggestions(evt.newValue),
-		// 	_terminal.GetHints(evt.newValue)
-		// );
+		_highlight.text = _terminal.Highlighter.Highlight(evt.newValue);
+		_popup.Update(
+			_terminal.Suggester.GetSuggestions(evt.newValue),
+			_terminal.Suggester.GetHints(evt.newValue)
+		);
 	}
 
 	private void OnKeyDown(KeyDownEvent evt)
@@ -95,11 +93,10 @@ public class TerminalInput : IEchoComponent
 
 		if (evt.keyCode == KeyCode.Tab)
 		{
-			// ToDo Reintroduce when we have static highlight, suggestion, or hints class.
-			// _popup.Update(
-			// 	_terminal.GetSuggestions(_inputField.value),
-			// 	_terminal.GetHints(_inputField.value)
-			// );
+			_popup.Update(
+				_terminal.Suggester.GetSuggestions(_inputField.value),
+				_terminal.Suggester.GetHints(_inputField.value)
+			);
 			evt.StopImmediatePropagation();
 			evt.StopPropagation();
 			return;

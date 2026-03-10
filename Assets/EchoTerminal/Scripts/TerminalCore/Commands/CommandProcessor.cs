@@ -11,6 +11,8 @@ public class CommandProcessor
 {
 	private static Dictionary<Type, IParser> _parsers;
 
+	public static IReadOnlyDictionary<Type, IParser> Parsers => GetParsers();
+
 	private readonly CommandRegistry _registry;
 	private readonly Terminal _terminal;
 
