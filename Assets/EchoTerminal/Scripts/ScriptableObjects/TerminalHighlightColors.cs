@@ -10,7 +10,7 @@ public class TerminalHighlightColors : ScriptableObject
 	[Header("Command Colors")] [SerializeField]
 	private Color _commandColor = new(0.67f, 0.87f, 1f);
 
-	[SerializeField] private Color _unknownCommandColor = new(1f, 0.27f, 0.27f);
+	[SerializeField] private Color _unknownColor = new(1f, 0.27f, 0.27f);
 	[SerializeField] private Color _fallbackParamColor = new(1f, 0.87f, 0.53f);
 
 	[Header("Type Colors")] [SerializeField]
@@ -22,7 +22,7 @@ public class TerminalHighlightColors : ScriptableObject
 	[SerializeField] private Color _gameObjectColor = new(0.31f, 0.98f, 0.48f);
 
 	public Color CommandColor => _commandColor;
-	public Color UnknownCommandColor => _unknownCommandColor;
+	public Color UnknownColor => _unknownColor;
 	public Color FallbackParamColor => _fallbackParamColor;
 
 	private Dictionary<Type, Color> _typeColors;
