@@ -6,7 +6,6 @@ namespace EchoTerminal.Scripts.Test
 public class GameObjectParser : IParser
 {
 	public Type TargetType => typeof(GameObject);
-	public string HighlightColor => "#50FA7B";
 
 	public bool TryParse(string input, out object result, out int charsConsumed)
 	{

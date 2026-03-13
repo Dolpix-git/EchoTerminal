@@ -6,7 +6,6 @@ namespace EchoTerminal.Scripts.Test
 public class FloatParser : IParser
 {
 	public Type TargetType => typeof(float);
-	public string HighlightColor => "#FFB86C";
 
 	public bool TryParse(string input, out object result, out int charsConsumed)
 	{
