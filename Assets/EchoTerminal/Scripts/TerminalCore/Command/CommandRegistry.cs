@@ -101,7 +101,7 @@ public class CommandRegistry
 
 			if (!_commands.TryGetValue(name, out var list))
 			{
-				list = new List<CommandEntry>();
+				list = new();
 				_commands[name] = list;
 			}
 

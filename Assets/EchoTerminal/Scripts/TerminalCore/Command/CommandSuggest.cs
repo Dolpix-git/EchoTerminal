@@ -16,21 +16,17 @@ public class CommandSuggest
 
 	public SuggestionContext GetSuggestions(string input)
 	{
-		if (string.IsNullOrEmpty(input))
+		if (!CommandProcessor.TryParseInput(input, out var commandName, out var args, out var leadingSpaces))
 		{
 			return SuggestionContext.Empty;
 		}
 
-		var trimmed = input.TrimStart();
-		var leadingSpaces = input.Length - trimmed.Length;
-		var space = trimmed.IndexOf(' ');
-
-		if (space == -1)
+		if (args == null)
 		{
 			var matches = new List<string>();
 			foreach (var name in _registry.GetCommandNames())
 			{
-				if (name.StartsWith(trimmed, StringComparison.OrdinalIgnoreCase))
+				if (name.StartsWith(commandName, StringComparison.OrdinalIgnoreCase))
 				{
 					matches.Add(name);
 				}
@@ -49,10 +45,9 @@ public class CommandSuggest
 			};
 		}
 
-		var afterCommand = trimmed[(space + 1)..];
-		if (afterCommand.StartsWith("@") && !afterCommand[1..].Contains(' '))
+		if (args.StartsWith("@") && !args[1..].Contains(' '))
 		{
-			var partial = afterCommand[1..];
+			var partial = args[1..];
 			var allGOs = Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
 			var goMatches = new List<string>();
 			foreach (var go in allGOs)
@@ -68,7 +63,7 @@ public class CommandSuggest
 				return SuggestionContext.Empty;
 			}
 
-			var atPos = input.IndexOf('@', leadingSpaces + space);
+			var atPos = input.IndexOf('@', leadingSpaces + commandName.Length);
 			return new()
 			{
 				Suggestions = goMatches,
@@ -82,14 +77,16 @@ public class CommandSuggest
 
 	public List<string> GetHints(string input)
 	{
-		var trimmed = input.TrimStart();
-		var space = trimmed.IndexOf(' ');
-		if (space == -1)
+		if (!CommandProcessor.TryParseInput(input, out var commandName, out var args, out _))
 		{
 			return null;
 		}
 
-		var commandName = trimmed[..space];
+		if (args == null)
+		{
+			return null;
+		}
+
 		if (!_registry.TryGet(commandName, out var entries))
 		{
 			return null;

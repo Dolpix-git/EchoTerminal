@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Text;
 using UnityEngine;
 
@@ -8,8 +7,8 @@ namespace EchoTerminal
 {
 public class CommandHighlight
 {
-	private readonly CommandRegistry _registry;
 	private readonly TerminalHighlightColors _colors;
+	private readonly CommandRegistry _registry;
 
 	public CommandHighlight(CommandRegistry registry, TerminalHighlightColors colors)
 	{
@@ -24,10 +23,11 @@ public class CommandHighlight
 			return input;
 		}
 
-		var trimmed = input.TrimStart();
-		var leadingSpaces = input.Length - trimmed.Length;
-		var space = trimmed.IndexOf(' ');
-		var commandName = space == -1 ? trimmed : trimmed[..space];
+		if (!CommandProcessor.TryParseInput(input, out var commandName, out var args, out var leadingSpaces))
+		{
+			return input;
+		}
+
 		var isKnown = _registry.TryGet(commandName, out var entries);
 
 		var sb = new StringBuilder();
@@ -43,7 +43,7 @@ public class CommandHighlight
 			sb.Append(commandName);
 		}
 
-		if (space == -1)
+		if (args == null)
 		{
 			return sb.ToString();
 		}
@@ -53,10 +53,10 @@ public class CommandHighlight
 
 		if (isKnown)
 		{
-			overloads = BuildOverloadParamTypes(entries, out hasNonStatic);
+			overloads = CommandProcessor.GetOverloadParamTypes(entries, out hasNonStatic);
 		}
 
-		var pos = leadingSpaces + space;
+		var pos = leadingSpaces + commandName.Length;
 		var paramIndex = 0;
 		var instanceTargetConsumed = false;
 
@@ -115,7 +115,7 @@ public class CommandHighlight
 
 			var expectedType = overload[paramIndex];
 
-			if (TryValidateToken(token, expectedType, out var colorType))
+			if (CommandProcessor.TryValidateToken(token, expectedType, out var colorType))
 			{
 				return ColorizeTyped(token, colorType);
 			}
@@ -131,101 +131,16 @@ public class CommandHighlight
 			return token;
 		}
 
-		var color = (colorType != null && _colors.TypeColors.TryGetValue(colorType, out var c))
+		var color = colorType != null && _colors.TypeColors.TryGetValue(colorType, out var c)
 			? c
 			: _colors.FallbackParamColor;
 
 		return $"<color={ToHex(color)}>{token}</color>";
 	}
 
-	private static bool TryValidateToken(string token, Type expectedType, out Type colorType)
+	private static string ToHex(Color c)
 	{
-		colorType = null;
-		var parsers = CommandProcessor.Parsers;
-
-		if (expectedType == typeof(Terminal))
-		{
-			return true;
-		}
-
-		if (expectedType.IsGenericType && expectedType.GetGenericTypeDefinition() == typeof(List<>))
-		{
-			var elementType = expectedType.GetGenericArguments()[0];
-			colorType = elementType;
-
-			foreach (var part in token.Split(','))
-			{
-				var trimmed = part.Trim();
-
-				if (parsers.TryGetValue(elementType, out var ep))
-				{
-					if (!ep.TryParse(trimmed, out _, out _))
-					{
-						return false;
-					}
-				}
-				else if (elementType.IsEnum)
-				{
-					if (!Enum.TryParse(elementType, trimmed, true, out _))
-					{
-						return false;
-					}
-				}
-				else
-				{
-					return false;
-				}
-			}
-
-			return true;
-		}
-
-		if (parsers.TryGetValue(expectedType, out var parser))
-		{
-			colorType = expectedType;
-			return parser.TryParse(token, out _, out _);
-		}
-
-		if (expectedType.IsEnum)
-		{
-			colorType = expectedType;
-			return Enum.TryParse(expectedType, token, true, out _);
-		}
-
-		return false;
+		return "#" + ColorUtility.ToHtmlStringRGB(c);
 	}
-
-	private static List<Type[]> BuildOverloadParamTypes(List<CommandEntry> entries, out bool hasNonStatic)
-	{
-		hasNonStatic = false;
-		var result = new List<Type[]>();
-
-		foreach (var entry in entries)
-		{
-			if (!entry.IsStatic)
-			{
-				hasNonStatic = true;
-			}
-
-			var paramInfos = entry.Method.GetParameters();
-			var types = new List<Type>();
-
-			foreach (var p in paramInfos)
-			{
-				if (p.ParameterType == typeof(Terminal))
-				{
-					continue;
-				}
-
-				types.Add(p.ParameterType);
-			}
-
-			result.Add(types.ToArray());
-		}
-
-		return result;
-	}
-
-	private static string ToHex(Color c) => "#" + ColorUtility.ToHtmlStringRGB(c);
 }
 }

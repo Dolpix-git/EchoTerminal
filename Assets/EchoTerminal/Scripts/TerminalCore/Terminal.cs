@@ -6,33 +6,33 @@ namespace EchoTerminal
 {
 public class Terminal
 {
+	public CommandRegistry Registry { get; }
+	public CommandHighlight Highlighter { get; }
+	public CommandSuggest Suggester { get; }
+
 	public event Action OnCleared;
 	public event Action<TerminalEntry> OnEntryAdded;
 
 	private readonly List<TerminalEntry> _entries = new();
 	private readonly int _maxEntries;
-	private readonly CommandProcessor _processor;
+	private readonly CommandExecutor _executor;
 
 	public Terminal(TerminalHighlightColors highlightColors, int maxEntries = 1000)
 	{
 		_maxEntries = maxEntries;
 		Registry = new();
 		Registry.Scan();
-		_processor = new(this, Registry);
+		_executor = new(this, Registry);
 		Highlighter = new(Registry, highlightColors);
 		Suggester = new(Registry);
 	}
-
-	public CommandRegistry Registry { get; }
-	public CommandHighlight Highlighter { get; }
-	public CommandSuggest Suggester { get; }
 
 	public IReadOnlyList<TerminalEntry> Entries => _entries;
 
 	public void Submit(string input)
 	{
 		Log(input, new Color(0.6f, 0.8f, 1f));
-		_processor.Execute(input);
+		_executor.Execute(input);
 	}
 
 	public void Log(string text, Color? color = null)

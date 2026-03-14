@@ -1,25 +1,110 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using EchoTerminal.Scripts.Test;
-using UnityEngine;
 
 namespace EchoTerminal
 {
-public class CommandProcessor
+public static class CommandProcessor
 {
 	private static Dictionary<Type, IParser> _parsers;
 
 	public static IReadOnlyDictionary<Type, IParser> Parsers => GetParsers();
 
-	private readonly CommandRegistry _registry;
-	private readonly Terminal _terminal;
-
-	public CommandProcessor(Terminal terminal, CommandRegistry registry)
+	public static bool TryParseInput(string input, out string commandName, out string args, out int leadingSpaces)
 	{
-		_terminal = terminal;
-		_registry = registry;
+		var trimmed = input.TrimStart();
+		leadingSpaces = input.Length - trimmed.Length;
+		commandName = string.Empty;
+		args = null;
+
+		if (trimmed.Length == 0)
+		{
+			return false;
+		}
+
+		var space = trimmed.IndexOf(' ');
+		commandName = space == -1 ? trimmed : trimmed[..space];
+		args = space == -1 ? null : trimmed[(space + 1)..];
+		return true;
+	}
+
+	public static List<Type[]> GetOverloadParamTypes(List<CommandEntry> entries, out bool hasNonStatic)
+	{
+		hasNonStatic = false;
+		var result = new List<Type[]>();
+
+		foreach (var entry in entries)
+		{
+			if (!entry.IsStatic)
+			{
+				hasNonStatic = true;
+			}
+
+			var paramInfos = entry.Method.GetParameters();
+			var types = new List<Type>();
+			foreach (var p in paramInfos)
+			{
+				if (p.ParameterType != typeof(Terminal))
+				{
+					types.Add(p.ParameterType);
+				}
+			}
+
+			result.Add(types.ToArray());
+		}
+
+		return result;
+	}
+
+	public static bool TryValidateToken(string token, Type expectedType, out Type colorType)
+	{
+		colorType = null;
+
+		if (expectedType == typeof(Terminal))
+		{
+			return true;
+		}
+
+		if (expectedType.IsGenericType && expectedType.GetGenericTypeDefinition() == typeof(List<>))
+		{
+			colorType = expectedType.GetGenericArguments()[0];
+			foreach (var part in token.Split(','))
+			{
+				if (!TryParseToken(part.Trim(), colorType, out _))
+				{
+					return false;
+				}
+			}
+
+			return true;
+		}
+
+		if (TryParseToken(token, expectedType, out _))
+		{
+			colorType = expectedType;
+			return true;
+		}
+
+		return false;
+	}
+
+	internal static bool TryParseToken(string token, Type type, out object result)
+	{
+		result = null;
+		var parsers = GetParsers();
+
+		if (parsers.TryGetValue(type, out var parser))
+		{
+			return parser.TryParse(token, out result, out _);
+		}
+
+		if (type.IsEnum)
+		{
+			return Enum.TryParse(type, token, true, out result);
+		}
+
+		return false;
 	}
 
 	private static Dictionary<Type, IParser> GetParsers()
@@ -76,170 +161,6 @@ public class CommandProcessor
 		}
 
 		return _parsers;
-	}
-
-	public void Execute(string input)
-	{
-		var remaining = input.TrimStart();
-		if (remaining.Length == 0)
-		{
-			return;
-		}
-
-		var space = remaining.IndexOf(' ');
-		var commandName = space == -1 ? remaining : remaining[..space];
-		remaining = space == -1 ? string.Empty : remaining[space..].TrimStart();
-
-		if (!_registry.TryGet(commandName, out var entries))
-		{
-			_terminal.Log($"Unknown command: '{commandName}'");
-			return;
-		}
-
-		foreach (var entry in entries)
-		{
-			if (TryInvoke(entry, remaining))
-			{
-				return;
-			}
-		}
-
-		_terminal.Log($"Invalid arguments for '{commandName}'");
-	}
-
-	private bool TryInvoke(CommandEntry entry, string commandString)
-	{
-		var parsers = GetParsers();
-
-		GameObject singleTarget = null;
-		if (!entry.IsStatic && parsers[typeof(GameObject)].TryParse(commandString, out var goObj, out var goConsumed))
-		{
-			var targetName = commandString[1..goConsumed];
-			commandString = commandString[goConsumed..].TrimStart();
-			singleTarget = goObj as GameObject;
-			if (singleTarget == null)
-			{
-				_terminal.Log($"No GameObject named '{targetName}' found in scene.");
-				return true;
-			}
-		}
-
-		var parameters = entry.Method.GetParameters();
-		var args = new object[parameters.Length];
-
-		for (var i = 0; i < parameters.Length; i++)
-		{
-			var paramType = parameters[i].ParameterType;
-
-			if (paramType == typeof(Terminal))
-			{
-				args[i] = _terminal;
-				continue;
-			}
-
-			if (parsers.TryGetValue(paramType, out var parser))
-			{
-				if (!parser.TryParse(commandString, out args[i], out var consumed))
-				{
-					return false;
-				}
-
-				commandString = commandString[consumed..].TrimStart();
-				continue;
-			}
-
-			if (paramType.IsEnum)
-			{
-				var end = commandString.IndexOf(' ');
-				var token = end == -1 ? commandString : commandString[..end];
-				if (!Enum.TryParse(paramType, token, true, out var enumVal))
-				{
-					return false;
-				}
-
-				args[i] = enumVal;
-				commandString = commandString[token.Length..].TrimStart();
-				continue;
-			}
-
-			if (paramType.IsGenericType && paramType.GetGenericTypeDefinition() == typeof(List<>))
-			{
-				var elementType = paramType.GetGenericArguments()[0];
-				var list = (IList)Activator.CreateInstance(paramType);
-				var tokens = commandString.Split(',');
-
-				foreach (var raw in tokens)
-				{
-					var t = raw.Trim();
-					if (parsers.TryGetValue(elementType, out var ep))
-					{
-						if (!ep.TryParse(t, out var el, out _))
-						{
-							return false;
-						}
-
-						list.Add(el);
-					}
-					else if (elementType.IsEnum)
-					{
-						if (!Enum.TryParse(elementType, t, true, out var enumEl))
-						{
-							return false;
-						}
-
-						list.Add(enumEl);
-					}
-					else
-					{
-						return false;
-					}
-				}
-
-				args[i] = list;
-				commandString = string.Empty;
-				continue;
-			}
-
-			return false;
-		}
-
-		if (entry.IsStatic)
-		{
-			var result = entry.Method.Invoke(null, args);
-			if (result is string message)
-			{
-				_terminal.Log(message);
-			}
-
-			return true;
-		}
-
-		var targets = _registry.GetInstances(entry.MonoType);
-		var invoked = false;
-
-		foreach (var target in targets)
-		{
-			if (singleTarget != null && target.gameObject != singleTarget)
-			{
-				continue;
-			}
-
-			invoked = true;
-			var result = entry.Method.Invoke(target, args);
-			if (result is string message)
-			{
-				_terminal.Log(message);
-			}
-		}
-
-		if (!invoked)
-		{
-			_terminal.Log(singleTarget != null
-				? $"No '{entry.MonoType.Name}' on '{singleTarget.name}' found in scene."
-				: $"No active '{entry.MonoType.Name}' found in scene.");
-		}
-
-		return true;
 	}
 }
 }
