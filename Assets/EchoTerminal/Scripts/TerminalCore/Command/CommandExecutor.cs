@@ -85,6 +85,28 @@ public class CommandExecutor
 			return;
 		}
 
+		foreach (var overload in result.Overloads)
+		{
+			foreach (var param in overload.Params)
+			{
+				if (param.Expected.IsTarget)
+				{
+					continue;
+				}
+
+				var type = param.Expected.Type;
+				var checkType = type.IsGenericType &&
+								type.GetGenericTypeDefinition() == typeof(System.Collections.Generic.List<>)
+					? type.GetGenericArguments()[0]
+					: type;
+				if (!CommandProcessor.Parsers.ContainsKey(checkType) && !checkType.IsEnum)
+				{
+					Debug.LogWarning(
+						$"[EchoTerminal] No parser registered for type '{checkType.Name}' (parameter '{param.Expected.Name}' on command '{result.CommandName}'). Register an IParser<{checkType.Name}> to support it.");
+				}
+			}
+		}
+
 		_terminal.Log($"Invalid arguments for '{result.CommandName}'");
 	}
 
