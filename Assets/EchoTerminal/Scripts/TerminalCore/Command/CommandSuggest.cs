@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using EchoTerminal.Scripts.Test;
-using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace EchoTerminal
 {
@@ -103,29 +101,24 @@ public class CommandSuggest
 
 		if (result.Args.StartsWith("@") && !result.Args[1..].Contains(' '))
 		{
-			var hasTarget = false;
+			var partial = result.Args[1..];
+			var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+			var goMatches = new List<string>();
+
 			foreach (var overload in result.Overloads)
 			{
-				if (overload.Params.Count > 0 && overload.Params[0].Expected.IsTarget)
+				if (overload.Params.Count == 0 || !overload.Params[0].Expected.IsTarget)
 				{
-					hasTarget = true;
-					break;
+					continue;
 				}
-			}
 
-			if (!hasTarget)
-			{
-				return SuggestionContext.Empty;
-			}
-
-			var partial = result.Args[1..];
-			var allGOs = Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
-			var goMatches = new List<string>();
-			foreach (var go in allGOs)
-			{
-				if (go.name.StartsWith(partial, StringComparison.OrdinalIgnoreCase))
+				foreach (var component in _parser.Registry.GetInstances(overload.Entry.MonoType))
 				{
-					goMatches.Add(go.name);
+					var name = component.gameObject.name;
+					if (seen.Add(name) && name.StartsWith(partial, StringComparison.OrdinalIgnoreCase))
+					{
+						goMatches.Add(name);
+					}
 				}
 			}
 
@@ -217,7 +210,10 @@ public class CommandSuggest
 			var count = 0;
 			foreach (var p in o.Params)
 			{
-				if (p.IsValid) count++;
+				if (p.IsValid)
+				{
+					count++;
+				}
 			}
 
 			if (count > bestValid)
