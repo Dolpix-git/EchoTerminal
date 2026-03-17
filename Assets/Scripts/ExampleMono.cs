@@ -55,11 +55,11 @@ public class ExampleMono : MonoBehaviour
 	[TerminalCommand]
 	private string Paint(Color color)
 	{
-		var renderer = GetComponentInChildren<MeshRenderer>();
+		var meshRenderer = GetComponentInChildren<MeshRenderer>();
 
-		if (renderer != null)
+		if (meshRenderer != null)
 		{
-			renderer.sharedMaterial.color = color;
+			meshRenderer.sharedMaterial.color = color;
 		}
 
 		return $"Color set to {color}";
