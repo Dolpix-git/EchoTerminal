@@ -76,6 +76,7 @@ public class TerminalSuggestionPopup
 			{
 				var hintClone = _hintItemTemplate.CloneTree();
 				var label = hintClone.Q<Label>("hint-label");
+				label.enableRichText = true;
 				label.text = hint;
 				_hintContainer.Add(hintClone);
 			}

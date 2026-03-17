@@ -30,7 +30,7 @@ public class Terminal
 		Executor = new(this, Parser);
 		Highlighter = new(Parser, highlightColors);
 		Suggester = new(Parser);
-		Hints = new(Parser);
+		Hints = new(Parser, highlightColors);
 	}
 
 	public void Submit(string input)
