@@ -25,7 +25,6 @@
     --interactive-active: rgba(255, 255, 255, 0.16);
 
     /* Accents */
-    --accent-selection: #3AFF27;
     --accent-focus: #2A4371;
     --close-default: #FF5F57;
     --close-hover: #FF3B30;
@@ -187,7 +186,6 @@
     -unity-font-definition: url('../../Fonts/JetBrainsMono-SemiBold.ttf');
     white-space: pre;
     --unity-cursor-color: var(--text-bright);
-    --unity-selection-color: var(--accent-selection);
 }
 
 .terminal-input:focus > .unity-text-field__input {

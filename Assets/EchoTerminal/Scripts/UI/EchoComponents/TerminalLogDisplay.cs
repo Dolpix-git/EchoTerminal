@@ -68,9 +68,11 @@ public class TerminalLogDisplay : IEchoComponent
 
 		var timestamp = clone.Q<Label>("timestamp");
 		timestamp.text = entry.Timestamp.ToString("HH:mm:ss");
+		timestamp.selection.isSelectable = true;
 
 		var message = clone.Q<Label>("message");
 		message.enableRichText = true;
+		message.selection.isSelectable = true;
 		var hex = ColorUtility.ToHtmlStringRGB(entry.Color);
 		message.text = $"<color=#{hex}>{entry.Text}</color>";
 
