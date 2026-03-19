@@ -1,5 +1,43 @@
+:root {
+    /* Backgrounds — Islands Dark Beta (ManyIslandsDark) */
+    --bg-base: #191A1C;
+    --bg-elevated: #26282C;
+    --bg-toolbar: #26282C;
+    --bg-input: #26272b;
+    --bg-log: #1F2024;
+    --bg-log-alt: #191A1C;
+    --bg-popup: #26282C;
+
+    /* Borders */
+    --border-window: #5F6269;
+    --border-subtle: #33353B;
+    --border-default: #393B40;
+    --border-dark: #26282C;
+
+    /* Text */
+    --text-primary: #BCBEC4;
+    --text-muted: #7A7E85;
+    --text-inactive: #9FA2A8;
+    --text-bright: #D1D3D9;
+
+    /* Interactive */
+    --interactive-hover: rgba(255, 255, 255, 0.09);
+    --interactive-active: rgba(255, 255, 255, 0.16);
+
+    /* Accents */
+    --accent-selection: #3AFF27;
+    --accent-focus: #2A4371;
+    --close-default: #FF5F57;
+    --close-hover: #FF3B30;
+
+    /* Scrollbar */
+    --scrollbar-thumb: rgba(128, 128, 128, 0.35);
+    --scrollbar-thumb-hover: rgba(128, 128, 128, 0.55);
+    --scrollbar-thumb-active: rgba(128, 128, 128, 0.75);
+}
+
 .terminal-container {
-    background-color: #1E1E1E;
+    background-color: var(--bg-base);
     flex-grow: 1;
     overflow: hidden;
 }
@@ -7,10 +45,10 @@
 .terminal-toolbar {
     flex-direction: row;
     align-items: center;
-    background-color: #3C3C3C;
+    background-color: var(--bg-toolbar);
     padding: 2px 4px;
     border-bottom-width: 1px;
-    border-bottom-color: #252526;
+    border-bottom-color: var(--border-dark);
     min-height: 22px;
 }
 
@@ -20,17 +58,17 @@
     border-radius: 2px;
     padding: 2px 8px;
     margin: 0 1px;
-    color: #CCCCCC;
+    color: var(--text-primary);
     font-size: 11px;
     -unity-text-align: middle-center;
 }
 
 .terminal-toolbar-button:hover {
-    background-color: #505050;
+    background-color: var(--interactive-hover);
 }
 
 .terminal-toolbar-button:active {
-    background-color: #606060;
+    background-color: var(--interactive-active);
 }
 
 .terminal-toolbar-toggle {
@@ -39,27 +77,27 @@
     border-radius: 2px;
     padding: 2px 8px;
     margin: 0 1px;
-    color: #999999;
+    color: var(--text-inactive);
     font-size: 11px;
     -unity-text-align: middle-center;
 }
 
 .terminal-toolbar-toggle:hover {
-    background-color: #505050;
+    background-color: var(--interactive-hover);
 }
 
 .terminal-toolbar-toggle--active {
-    background-color: #505050;
-    color: #FFFFFF;
+    background-color: var(--interactive-hover);
+    color: var(--text-bright);
 }
 
 .terminal-toolbar-toggle--active:hover {
-    background-color: #606060;
+    background-color: var(--interactive-active);
 }
 
 .terminal-toolbar-separator {
     width: 1px;
-    background-color: #505050;
+    background-color: var(--interactive-hover);
     margin: 2px 6px;
     align-self: stretch;
 }
@@ -68,7 +106,7 @@
     flex-grow: 1;
     min-height: 0;
     padding: 0;
-    background-color: #383838;
+    background-color: var(--bg-log);
 }
 
 .terminal-log #unity-content-container {
@@ -77,7 +115,7 @@
 
 .terminal-entry {
     font-size: 12px;
-    color: #CCCCCC;
+    color: var(--text-primary);
     padding: 4px 8px;
     margin: 0;
     white-space: normal;
@@ -87,16 +125,16 @@
 }
 
 .terminal-entry--odd {
-    background-color: #383838;
+    background-color: var(--bg-log);
 }
 
 .terminal-entry--even {
-    background-color: #323232;
+    background-color: var(--bg-log-alt);
 }
 
 .terminal-timestamp {
     display: none;
-    color: #808080;
+    color: var(--text-muted);
     font-size: 11px;
     -unity-text-align: upper-left;
     margin-right: 4px;
@@ -114,9 +152,9 @@
 .terminal-input-row {
     flex-direction: row;
     align-items: center;
-    background-color: #2e2e2e;
+    background-color: var(--bg-input);
     border-top-width: 1px;
-    border-top-color: #1E1E1E;
+    border-top-color: var(--bg-base);
     flex-shrink: 0;
 }
 
@@ -140,12 +178,12 @@
     font-size: 14px;
     background-color: transparent;
     border-width: 0;
-    color: #CCCCCC;
+    color: var(--text-primary);
     padding: 10px 6px;
     -unity-font-definition: url('../../Fonts/JetBrainsMono-SemiBold.ttf');
     white-space: pre;
-    --unity-cursor-color: #FFFFFF;
-    --unity-selection-color: #3aff27;
+    --unity-cursor-color: var(--text-bright);
+    --unity-selection-color: var(--accent-selection);
 }
 
 .terminal-input:focus > .unity-text-field__input {
@@ -171,50 +209,80 @@
     bottom: 100%;
     left: 0;
     right: 0;
-    background-color: #252526;
+    background-color: var(--bg-popup);
     border-width: 1px;
-    border-color: #454545;
+    border-color: var(--border-default);
     -unity-font-definition: url('../../Fonts/JetBrainsMono-SemiBold.ttf');
 }
 
 .terminal-suggestion-item {
     font-size: 12px;
-    color: #CCCCCC;
+    color: var(--text-primary);
     padding: 2px 8px;
 }
 
 .terminal-suggestion-item--selected {
-    background-color: #094771;
-    color: #FFFFFF;
+    background-color: var(--accent-focus);
+    color: var(--text-bright);
 }
 
 .terminal-hint-label {
     font-size: 12px;
-    color: #808080;
+    color: var(--text-muted);
     padding: 4px 8px;
     -unity-font-style: italic;
     border-top-width: 1px;
-    border-top-color: #454545;
+    border-top-color: var(--border-default);
 }
 
 .terminal-log .unity-scroller--vertical {
-    width: 14px;
+    width: 8px;
+    background-color: transparent;
+}
+
+.terminal-log .unity-scroller--vertical .unity-base-slider {
+    flex-grow: 1;
+    margin: 0;
+    padding: 0;
+    min-width: 0;
+    min-height: 0;
 }
 
 .terminal-log .unity-scroller--vertical .unity-base-slider__tracker {
-    background-color: #3E3E42;
+    background-color: transparent;
     border-width: 0;
+    margin: 0;
+    padding: 0;
+}
+
+.terminal-log .unity-scroller--vertical .unity-base-slider__drag-container {
+    left: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
 }
 
 .terminal-log .unity-scroller--vertical .unity-base-slider__dragger {
-    background-color: #686868;
+    background-color: var(--scrollbar-thumb);
     border-width: 0;
+    border-radius: 4px;
+    left: 0;
+    right: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
 }
 
 .terminal-log .unity-scroller--vertical .unity-base-slider__dragger:hover {
-    background-color: #9E9E9E;
+    background-color: var(--scrollbar-thumb-hover);
+}
+
+.terminal-log .unity-scroller--vertical .unity-base-slider__dragger:active {
+    background-color: var(--scrollbar-thumb-active);
 }
 
 .terminal-log .unity-repeat-button {
     display: none;
+    width: 0;
+    height: 0;
 }

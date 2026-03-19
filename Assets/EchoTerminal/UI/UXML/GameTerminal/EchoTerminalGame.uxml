@@ -12,7 +12,7 @@
                 <ui:VisualElement class="terminal-toolbar-separator"/>
                 <ui:Button name="timestamps-toggle" text="Timestamps" class="terminal-toolbar-toggle" style="margin-right: 0; padding-top: 0; padding-bottom: 0; height: 100%; margin-left: 0;"/>
             </ui:VisualElement>
-            <ui:ScrollView name="log-scroll" class="terminal-log">
+            <ui:ScrollView name="log-scroll" class="terminal-log" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="AlwaysVisible">
                 <ui:VisualElement name="log-container"/>
             </ui:ScrollView>
             <ui:VisualElement name="input-row" class="terminal-input-row">
