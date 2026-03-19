@@ -37,13 +37,13 @@ public class Terminal
 	public void Submit(string input)
 	{
 		OnSubmitted?.Invoke();
-		Log(Highlighter.Highlight(input));
+		Log(Highlighter.Highlight(input), kind: LogKind.Command);
 		Executor.Execute(input);
 	}
 
-	public void Log(string text, Color? color = null)
+	public void Log(string text, Color? color = null, LogKind kind = LogKind.Log)
 	{
-		var entry = new TerminalEntry(text, color ?? Color.white);
+		var entry = new TerminalEntry(text, color ?? Color.white, kind);
 		if (_entries.Count >= _maxEntries)
 		{
 			_entries.RemoveAt(0);

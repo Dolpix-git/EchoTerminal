@@ -64,6 +64,7 @@ public class TerminalLogDisplay : IEchoComponent
 		var clone = _entryTemplate.CloneTree();
 		var row = clone.Q<VisualElement>(className: "terminal-entry");
 		row.AddToClassList(_entryCount % 2 == 0 ? "terminal-entry--even" : "terminal-entry--odd");
+		row.AddToClassList($"terminal-entry--{entry.Kind.ToString().ToLower()}");
 
 		var timestamp = clone.Q<Label>("timestamp");
 		timestamp.text = entry.Timestamp.ToString("HH:mm:ss");

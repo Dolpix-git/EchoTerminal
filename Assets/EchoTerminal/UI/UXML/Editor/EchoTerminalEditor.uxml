@@ -5,6 +5,13 @@
             <ui:Button name="clear-button" text="Clear" class="terminal-toolbar-button" style="margin-left: 0; margin-right: 0; padding-bottom: 0; padding-top: 0; height: 100%;"/>
             <ui:VisualElement class="terminal-toolbar-separator"/>
             <ui:Button name="timestamps-toggle" text="Timestamps" class="terminal-toolbar-toggle" style="margin-right: 0; padding-top: 0; padding-bottom: 0; height: 100%; margin-left: 0;"/>
+            <ui:VisualElement class="terminal-toolbar-separator"/>
+            <ui:Button name="filter-log" text="Log 0" class="terminal-toolbar-toggle terminal-toolbar-toggle--active terminal-filter-button" style="padding: 0 6px; height: 100%;"/>
+            <ui:Button name="filter-warning" text="Warn 0" class="terminal-toolbar-toggle terminal-toolbar-toggle--active terminal-filter-button" style="padding: 0 6px; height: 100%;"/>
+            <ui:Button name="filter-error" text="Err 0" class="terminal-toolbar-toggle terminal-toolbar-toggle--active terminal-filter-button" style="padding: 0 6px; height: 100%;"/>
+            <ui:Button name="filter-command" text="Cmd 0" class="terminal-toolbar-toggle terminal-toolbar-toggle--active terminal-filter-button" style="padding: 0 6px; height: 100%;"/>
+            <ui:VisualElement style="flex-grow: 1;"/>
+            <ui:Button name="scroll-bottom" text="↓" class="terminal-toolbar-button" style="margin: 0; padding: 0 8px; height: 100%;"/>
         </ui:VisualElement>
         <ui:ScrollView name="log-scroll" class="terminal-log">
             <ui:VisualElement name="log-container"/>

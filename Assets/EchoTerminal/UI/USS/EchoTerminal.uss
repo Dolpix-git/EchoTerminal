@@ -95,6 +95,10 @@
     background-color: var(--interactive-active);
 }
 
+.terminal-filter-button {
+    margin-left: 6px;
+}
+
 .terminal-toolbar-separator {
     width: 1px;
     background-color: var(--interactive-hover);
@@ -234,6 +238,11 @@
     border-top-width: 1px;
     border-top-color: var(--border-default);
 }
+
+.filter-hide-log .terminal-entry--log         { display: none; }
+.filter-hide-warning .terminal-entry--warning { display: none; }
+.filter-hide-error .terminal-entry--error     { display: none; }
+.filter-hide-command .terminal-entry--command { display: none; }
 
 .terminal-log .unity-scroller--vertical {
     width: 8px;
