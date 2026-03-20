@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine.UIElements;
 
@@ -11,9 +12,12 @@ public class TerminalSuggestionPopup
 	private readonly VisualElement _listContainer;
 	private readonly VisualTreeAsset _suggestionItemTemplate;
 	private SuggestionContext _context;
+	private string _lastInput;
 	private int _selectedIndex;
 
 	private List<string> _suggestions;
+
+	public Action<string> OnAccepted;
 
 	public TerminalSuggestionPopup(VisualElement parent, TerminalConfig config)
 	{
@@ -29,9 +33,10 @@ public class TerminalSuggestionPopup
 
 	public bool HasSuggestions => _suggestions is { Count: > 0 };
 
-	public void Update(SuggestionContext context, List<string> hints)
+	public void Update(SuggestionContext context, List<string> hints, string input = "")
 	{
 		_context = context;
+		_lastInput = input;
 		var hasSuggestions = context.Suggestions != null && context.Suggestions.Count > 0;
 		var hasHints = hints != null && hints.Count > 0;
 
@@ -58,6 +63,9 @@ public class TerminalSuggestionPopup
 				{
 					label.AddToClassList("terminal-suggestion-item--selected");
 				}
+
+				var capturedIndex = i;
+				label.RegisterCallback<ClickEvent>(_ => AcceptAtIndex(capturedIndex));
 
 				_listContainer.Add(itemClone);
 			}
@@ -113,9 +121,15 @@ public class TerminalSuggestionPopup
 
 		if (_selectedIndex >= 0 && _selectedIndex < _listContainer.childCount)
 		{
-			_listContainer[_selectedIndex]
+			var selectedElement = _listContainer[_selectedIndex];
+			selectedElement
 				.Q<Label>("suggestion-label")
 				?.AddToClassList("terminal-suggestion-item--selected");
+
+			if (_listContainer is ScrollView scrollView)
+			{
+				scrollView.ScrollTo(selectedElement);
+			}
 		}
 	}
 
@@ -142,6 +156,18 @@ public class TerminalSuggestionPopup
 		_hintContainer.Clear();
 		_suggestions = null;
 		_selectedIndex = -1;
+	}
+
+	private void AcceptAtIndex(int index)
+	{
+		if (_suggestions == null || index < 0 || index >= _suggestions.Count)
+		{
+			return;
+		}
+
+		_selectedIndex = index;
+		var result = AcceptSuggestion(_lastInput);
+		OnAccepted?.Invoke(result);
 	}
 }
 }

@@ -146,6 +146,13 @@ public class CommandParser
 					remaining = remaining[consumed..].TrimStart();
 					results.Add(new(param, token, value, true));
 				}
+				else if (parser is IRestConsumingParser)
+				{
+					var token = remaining.Length > 0 ? remaining : null;
+					results.Add(new(param, token, null, false));
+					remaining = string.Empty;
+					allValid = false;
+				}
 				else
 				{
 					var (token, rest) = ConsumeToken(remaining);

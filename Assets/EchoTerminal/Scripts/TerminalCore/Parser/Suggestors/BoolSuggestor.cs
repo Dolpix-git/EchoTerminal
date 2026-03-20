@@ -11,16 +11,7 @@ public class BoolSuggestor : ISuggestor
 
 	public IReadOnlyList<string> GetSuggestions(Type type, string partial)
 	{
-		var matches = new List<string>();
-		foreach (var v in Values)
-		{
-			if (v.StartsWith(partial, StringComparison.OrdinalIgnoreCase))
-			{
-				matches.Add(v);
-			}
-		}
-
-		return matches;
+		return FuzzyMatcher.Filter(Values, partial);
 	}
 }
 }

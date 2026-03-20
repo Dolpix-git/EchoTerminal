@@ -85,18 +85,13 @@ public class CommandSuggest
 
 		if (result.Args == null)
 		{
-			var matches = new List<string>();
-			foreach (var name in _parser.Registry.GetCommandNames())
+			var matches = FuzzyMatcher.Filter(_parser.Registry.GetCommandNames(), result.CommandName);
+			if (matches.Count == 0)
 			{
-				if (name.StartsWith(result.CommandName, StringComparison.OrdinalIgnoreCase))
-				{
-					matches.Add(name);
-				}
+				return SuggestionContext.Empty;
 			}
 
-			return matches.Count == 0
-				? SuggestionContext.Empty
-				: new() { Suggestions = matches, ReplaceStart = result.LeadingSpaces, ReplaceEnd = input.Length };
+			return new() { Suggestions = matches, ReplaceStart = result.LeadingSpaces, ReplaceEnd = input.Length };
 		}
 
 		if (result.Args.StartsWith("@") && !result.Args[1..].Contains(' '))
@@ -115,7 +110,7 @@ public class CommandSuggest
 				foreach (var component in _parser.Registry.GetInstances(overload.Entry.MonoType))
 				{
 					var name = component.gameObject.name;
-					if (seen.Add(name) && name.StartsWith(partial, StringComparison.OrdinalIgnoreCase))
+					if (seen.Add(name) && FuzzyMatcher.Score(name, partial) >= 0)
 					{
 						goMatches.Add(name);
 					}
@@ -134,7 +129,7 @@ public class CommandSuggest
 		return SuggestParam(input, result);
 	}
 
-	private static SuggestionContext SuggestParam(string input, CommandParseResult result)
+	private SuggestionContext SuggestParam(string input, CommandParseResult result, int depth = 0)
 	{
 		if (result.Overloads.Count == 0)
 		{
@@ -142,6 +137,8 @@ public class CommandSuggest
 		}
 
 		var best = PickBestOverload(result.Overloads);
+		var hasPrevValid = false;
+		var prevValidParam = default(ParamResult);
 
 		foreach (var param in best.Params)
 		{
@@ -149,6 +146,12 @@ public class CommandSuggest
 			{
 				if (param.IsValid || param.Token == null)
 				{
+					if (param.IsValid)
+					{
+						hasPrevValid = true;
+						prevValidParam = param;
+					}
+
 					continue;
 				}
 
@@ -157,12 +160,37 @@ public class CommandSuggest
 
 			if (param.IsValid)
 			{
+				hasPrevValid = true;
+				prevValidParam = param;
 				continue;
+			}
+
+			if (param.Token == null && hasPrevValid && !input.EndsWith(" "))
+			{
+				var lastSp = input.LastIndexOf(' ');
+				var rStart = lastSp + 1;
+				var prevPartial = rStart < input.Length ? input[rStart..] : "";
+				var prevMatches = GetTypeSuggestions(prevValidParam.Expected.Type, prevPartial);
+				if (prevMatches != null && prevMatches.Count > 0)
+				{
+					return new() { Suggestions = prevMatches, ReplaceStart = rStart, ReplaceEnd = input.Length };
+				}
+			}
+
+			if (param.Expected.Type == typeof(CommandName))
+			{
+				return depth == 0 ? SuggestCommandName(input) : SuggestionContext.Empty;
 			}
 
 			var lastSpace = input.LastIndexOf(' ');
 			var replaceStart = lastSpace + 1;
 			var partial = replaceStart < input.Length ? input[replaceStart..] : "";
+
+			if (param.Expected.Type.IsGenericType &&
+				param.Expected.Type.GetGenericTypeDefinition() == typeof(List<>))
+			{
+				return SuggestListElement(param.Expected.Type, partial, replaceStart, input.Length);
+			}
 
 			var matches = GetTypeSuggestions(param.Expected.Type, partial);
 			if (matches == null || matches.Count == 0)
@@ -176,12 +204,134 @@ public class CommandSuggest
 		return SuggestionContext.Empty;
 	}
 
+	private SuggestionContext SuggestCommandName(string input)
+	{
+		var openBracket = -1;
+		for (var i = input.Length - 1; i >= 0; i--)
+		{
+			if (input[i] == '<')
+			{
+				break;
+			}
+
+			if (input[i] == '>')
+			{
+				openBracket = i;
+				break;
+			}
+		}
+
+		int tokenStart;
+		string innerInput;
+
+		if (openBracket >= 0)
+		{
+			tokenStart = openBracket;
+			innerInput = input[(openBracket + 1)..];
+		}
+		else
+		{
+			var lastSpace = input.LastIndexOf(' ');
+			tokenStart = lastSpace >= 0 ? lastSpace + 1 : 0;
+			innerInput = "";
+		}
+
+		if (!CommandProcessor.TryParseInput(innerInput, out var innerCmd, out var innerArgs, out _) ||
+			innerCmd.Length == 0)
+		{
+			return AllCommandSuggestions(tokenStart, input.Length);
+		}
+
+		if (innerArgs == null)
+		{
+			return FilteredCommandSuggestions(innerCmd, tokenStart, input.Length);
+		}
+
+		var innerResult = _parser.Parse(innerInput);
+		var innerCtx = SuggestParam(innerInput, innerResult, 1);
+
+		if (innerCtx.Suggestions == null || innerCtx.Suggestions.Count == 0)
+		{
+			return SuggestionContext.Empty;
+		}
+
+		var innerPrefix = innerInput[..innerCtx.ReplaceStart];
+		var innerSuffix = innerCtx.ReplaceEnd < innerInput.Length
+			? innerInput[innerCtx.ReplaceEnd..]
+			: "";
+
+		var wrapped = new List<string>(innerCtx.Suggestions.Count);
+		foreach (var s in innerCtx.Suggestions)
+		{
+			wrapped.Add($">{innerPrefix}{s}{innerSuffix}<");
+		}
+
+		return new() { Suggestions = wrapped, ReplaceStart = tokenStart, ReplaceEnd = input.Length };
+	}
+
+	private SuggestionContext AllCommandSuggestions(int replaceStart, int replaceEnd)
+	{
+		var names = new List<string>(_parser.Registry.GetCommandNames());
+		names.Sort(StringComparer.OrdinalIgnoreCase);
+
+		var wrapped = new List<string>(names.Count);
+		foreach (var n in names)
+		{
+			wrapped.Add($">{n}<");
+		}
+
+		return wrapped.Count == 0
+			? SuggestionContext.Empty
+			: new() { Suggestions = wrapped, ReplaceStart = replaceStart, ReplaceEnd = replaceEnd };
+	}
+
+	private SuggestionContext FilteredCommandSuggestions(string partial, int replaceStart, int replaceEnd)
+	{
+		var names = FuzzyMatcher.Filter(_parser.Registry.GetCommandNames(), partial);
+		if (names.Count == 0)
+		{
+			return SuggestionContext.Empty;
+		}
+
+		var wrapped = new List<string>(names.Count);
+		foreach (var n in names)
+		{
+			wrapped.Add($">{n}<");
+		}
+
+		return new() { Suggestions = wrapped, ReplaceStart = replaceStart, ReplaceEnd = replaceEnd };
+	}
+
+	private static SuggestionContext SuggestListElement(
+		Type listType,
+		string partial,
+		int replaceStart,
+		int replaceEnd)
+	{
+		var elemType = listType.GetGenericArguments()[0];
+		var lastComma = partial.LastIndexOf(',');
+		var elemPartial = lastComma == -1 ? partial : partial[(lastComma + 1)..].TrimStart();
+		var prefix = lastComma == -1 ? "" : partial[..(lastComma + 1)];
+
+		var elemMatches = GetTypeSuggestions(elemType, elemPartial);
+		if (elemMatches == null || elemMatches.Count == 0)
+		{
+			return SuggestionContext.Empty;
+		}
+
+		var suggestions = new List<string>(elemMatches.Count);
+		foreach (var s in elemMatches)
+		{
+			suggestions.Add(prefix + s);
+		}
+
+		return new() { Suggestions = suggestions, ReplaceStart = replaceStart, ReplaceEnd = replaceEnd };
+	}
+
 	private static List<string> GetTypeSuggestions(Type type, string partial)
 	{
-		// Exact type match first.
 		if (!Suggestors.TryGetValue(type, out var suggestor))
 		{
-			// For enums, fall back to the EnumSuggestor registered under typeof(Enum).
 			if (!type.IsEnum || !Suggestors.TryGetValue(typeof(Enum), out suggestor))
 			{
 				return null;

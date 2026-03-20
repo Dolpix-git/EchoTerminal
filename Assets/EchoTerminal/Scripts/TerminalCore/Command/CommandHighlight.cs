@@ -35,7 +35,10 @@ public class CommandHighlight
 
 		if (_colors != null)
 		{
-			var cmdColor = ToHex(result.IsKnownCommand ? _colors.CommandColor : _colors.UnknownColor);
+			var cmdColor = ToHex(result.IsKnownCommand || IsPartialCommandName(result.CommandName)
+				? _colors.CommandColor
+				: _colors.UnknownColor);
+
 			sb.Append($"<color={cmdColor}>{result.CommandName}</color>");
 		}
 		else
@@ -54,6 +57,8 @@ public class CommandHighlight
 		var args = result.Args;
 		var pos = 0;
 
+		var stillTyping = input.Length > 0 && input[^1] != ' ';
+
 		foreach (var param in overload.Params)
 		{
 			if (param.Token == null)
@@ -69,10 +74,14 @@ public class CommandHighlight
 
 			sb.Append(args, pos, tokenIdx - pos);
 
+			var isLastToken = stillTyping && tokenIdx + param.Token.Length == args.Length;
+
 			sb.Append(_colors != null
 				? param.IsValid
 					? ColorizeTyped(param.Token, param.Expected.Type)
-					: $"<color={ToHex(_colors.UnknownColor)}>{param.Token}</color>"
+					: isLastToken
+						? $"<color={ToHex(_colors.FallbackParamColor)}>{EscapeForTmp(param.Token)}</color>"
+						: $"<color={ToHex(_colors.UnknownColor)}>{EscapeForTmp(param.Token)}</color>"
 				: param.Token);
 
 			pos = tokenIdx + param.Token.Length;
@@ -89,12 +98,27 @@ public class CommandHighlight
 			if (content.Length > 0)
 			{
 				sb.Append(_colors != null
-					? $"<color={ToHex(_colors.UnknownColor)}>{content}</color>"
+					? stillTyping
+						? $"<color={ToHex(_colors.FallbackParamColor)}>{EscapeForTmp(content)}</color>"
+						: $"<color={ToHex(_colors.UnknownColor)}>{EscapeForTmp(content)}</color>"
 					: content);
 			}
 		}
 
 		return sb.ToString();
+	}
+
+	private bool IsPartialCommandName(string name)
+	{
+		foreach (var cmd in _parser.Registry.GetCommandNames())
+		{
+			if (cmd.StartsWith(name, StringComparison.OrdinalIgnoreCase))
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	private static OverloadResult PickBestOverload(IReadOnlyList<OverloadResult> overloads)
@@ -142,7 +166,12 @@ public class CommandHighlight
 			? c
 			: _colors.FallbackParamColor;
 
-		return $"<color={ToHex(color)}>{token}</color>";
+		return $"<color={ToHex(color)}>{EscapeForTmp(token)}</color>";
+	}
+
+	private static string EscapeForTmp(string s)
+	{
+		return s.Contains('<') ? s.Replace("<", "<noparse><</noparse>") : s;
 	}
 
 	private static string ToHex(Color c)

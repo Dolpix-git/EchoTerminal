@@ -27,6 +27,7 @@ public class TerminalInput : IEchoComponent
 
 		_inputField.Q<TextElement>().style.color = Color.clear;
 		_popup = new(_inputField.parent, config);
+		_popup.OnAccepted = ApplySuggestion;
 		_inputField.RegisterValueChangedCallback(OnValueChanged);
 	}
 
@@ -34,6 +35,16 @@ public class TerminalInput : IEchoComponent
 	{
 		_inputField?.UnregisterCallback<KeyDownEvent>(OnKeyDown, TrickleDown.TrickleDown);
 		_inputField?.UnregisterValueChangedCallback(OnValueChanged);
+	}
+
+	private void ApplySuggestion(string result)
+	{
+		_inputField.value = result;
+		_inputField.schedule.Execute(() =>
+		{
+			_inputField.Focus();
+			_inputField.SelectRange(result.Length, result.Length);
+		});
 	}
 
 	private void OnValueChanged(ChangeEvent<string> evt)
@@ -46,7 +57,8 @@ public class TerminalInput : IEchoComponent
 		_highlight.text = _terminal.Highlighter.Highlight(evt.newValue);
 		_popup.Update(
 			_terminal.Suggester.GetSuggestions(evt.newValue),
-			_terminal.Hints.GetHints(evt.newValue)
+			_terminal.Hints.GetHints(evt.newValue),
+			evt.newValue
 		);
 	}
 
@@ -58,14 +70,7 @@ public class TerminalInput : IEchoComponent
 			{
 				case KeyCode.Tab or KeyCode.Return or KeyCode.KeypadEnter:
 				{
-					var result = _popup.AcceptSuggestion(_inputField.value);
-					_inputField.value = result;
-					_inputField.schedule.Execute(() =>
-					{
-						_inputField.Focus();
-						_inputField.SelectRange(result.Length, result.Length);
-					});
-
+					ApplySuggestion(_popup.AcceptSuggestion(_inputField.value));
 					evt.StopImmediatePropagation();
 					evt.StopPropagation();
 					return;
@@ -92,7 +97,8 @@ public class TerminalInput : IEchoComponent
 		{
 			_popup.Update(
 				_terminal.Suggester.GetSuggestions(_inputField.value),
-				_terminal.Hints.GetHints(_inputField.value)
+				_terminal.Hints.GetHints(_inputField.value),
+				_inputField.value
 			);
 			evt.StopImmediatePropagation();
 			evt.StopPropagation();

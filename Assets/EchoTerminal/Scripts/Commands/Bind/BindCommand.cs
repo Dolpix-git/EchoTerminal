@@ -7,10 +7,10 @@ namespace EchoTerminal
 public static class BindCommand
 {
 	[TerminalCommand("BindsAdd", "Bind a key to a command")]
-	private static void BindsAdd(Key key, string command)
+	private static void BindsAdd(Key key, CommandName command)
 	{
-		BindStore.Set(key, command);
-		Debug.Log($"Bound {key} to: {command}");
+		BindStore.Set(key, command.Value);
+		Debug.Log($"Bound {key} to: {command.Value}");
 	}
 
 	[TerminalCommand("BindsRemove", "Remove a key binding")]
