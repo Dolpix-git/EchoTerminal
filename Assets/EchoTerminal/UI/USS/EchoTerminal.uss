@@ -26,6 +26,8 @@
 
     /* Accents */
     --accent-focus: #2A4371;
+    --accent-copy: #3A7D44;
+    --accent-copy-text: #A8E6B0;
     --close-default: #FF5F57;
     --close-hover: #FF3B30;
 
@@ -226,6 +228,25 @@
 .terminal-suggestion-item--selected {
     background-color: var(--accent-focus);
     color: var(--text-bright);
+}
+
+.terminal-copy-toast {
+    position: absolute;
+    top: 26px;
+    right: 8px;
+    background-color: var(--bg-elevated);
+    border-width: 1px;
+    border-color: var(--border-default);
+    border-radius: 4px;
+    color: var(--text-bright);
+    font-size: 11px;
+    padding: 4px 10px;
+    -unity-text-align: middle-center;
+}
+
+#copy-button:active {
+    background-color: var(--accent-copy);
+    color: var(--accent-copy-text);
 }
 
 .terminal-hint-label {
