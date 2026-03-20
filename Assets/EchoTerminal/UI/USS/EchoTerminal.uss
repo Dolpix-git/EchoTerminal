@@ -142,6 +142,8 @@
     color: var(--text-muted);
     font-size: 11px;
     -unity-text-align: upper-left;
+    padding: 0;
+    margin: 0;
     margin-right: 4px;
 }
 
@@ -152,6 +154,8 @@
 .terminal-message {
     flex-grow: 1;
     white-space: normal;
+    padding: 0;
+    margin: 0;
 }
 
 .terminal-input-row {
